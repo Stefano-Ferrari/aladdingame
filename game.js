@@ -5,7 +5,7 @@ function preload() {
     game.load.image('background', 'assets/Lungo.png');
     game.load.tilemap('mappa', 'mappa.json', null, Phaser.Tilemap.TILED_JSON);
     game.load.image('tiles', 'Aladdin_tiles.png');
-    game.load.spritesheet('dude', 'assets/dude.png',32,48);
+    game.load.spritesheet('dude', 'assets/dudeBIG.png',56,84);
     game.load.image('star', 'assets/star.png');
     game.load.image('cube', 'assets/50x50.png');
     game.load.image('pareteMobile', 'assets/pareteMobile.png');
@@ -20,6 +20,7 @@ var take; //tasto presa
 var drop; //tasto rilascio
 var i=0; //check raccolta chiave
 var j=0; //check contatto cassa-ostacoli (serve causa fisica arcade)
+var k=0;
 var direction = 1; //riferimento della direzione del personaggio
 var button; //tasto per trappole
 var trapbox; //parete mobile
@@ -40,11 +41,12 @@ function create() {
     cube2.anchor.x=0.25;
 	cube2.anchor.y=0.25;
     
-    button = game.add.sprite( 1350, 2240, 'button');
-    trapbox = game.add.sprite( 1536, 1900, 'pareteMobile');
-	trapbox2 = game.add.sprite( 1922, 1900, 'pareteMobile');
+    button = game.add.sprite( 1330, 2240, 'button');
+	button2 = game.add.sprite( 1680, 2240, 'button');
+    trapbox = game.add.sprite( 1536, 1880, 'pareteMobile');
+	trapbox2 = game.add.sprite( 1922, 1680, 'pareteMobile');
     
-    player = game.add.sprite(20,2100,'dude');
+    player = game.add.sprite(100,2200,'dude');
 	player.anchor.x=0.25;
 	player.anchor.y=0.25;
     player.animations.add('right', [5,6,7,8], 10, true);
@@ -58,6 +60,7 @@ function create() {
     
     game.physics.arcade.enable(player);
     game.physics.arcade.enable(button);
+	game.physics.arcade.enable(button2);
     game.physics.arcade.enable(trapbox);
     game.physics.arcade.enable(trapbox2);
     trapbox.body.immovable = true;
@@ -68,7 +71,7 @@ function create() {
     player.body.velocity.x = 0;
     
 
-    key1 = createKeys(1500, 1500);
+    key1 = createKeys(1500, 1850);
 	key1.anchor.x=0.25;
 	key1.anchor.y=0.25;    
    
@@ -83,32 +86,36 @@ function create() {
 
     game.camera.follow(player);
     
-    game.camera.deadzone = new Phaser.Rectangle(387, 350, 250, 300);
+    game.camera.deadzone = new Phaser.Rectangle(387, 350, 250, 0);
 }
 
 
 
 
 function update() {
-    //j=0;
-    
+	//console.log(j);
+	
     player.dragging=false;
-    
+
+
     updateCubes(cube2, player);
 	updateCubes(cube1, player);
 
 	
 	updateKeys(key1, player);
 	
+
+	
     game.physics.arcade.collide(player, layer);
-    trapPlayer = game.physics.arcade.collide(player, trapbox);
-    trapPlayer2 = game.physics.arcade.collide(player, trapbox2);
-    trapCube = game.physics.arcade.collide(trapbox, cube2);
+    game.physics.arcade.collide(player, trapbox, trapPlayer);
+    game.physics.arcade.collide(player, trapbox2, trapPlayer);
+    game.physics.arcade.collide(trapbox, cube2, trapCube);
     game.physics.arcade.collide(trapbox2, cube2);
     game.physics.arcade.collide(layer, trapbox);
     game.physics.arcade.collide(layer, trapbox2);    
     
-    //parete mobile
+	k=0;
+    /* //parete mobile
     if( trapCube){
         j=1;
         trapbox.body.gravity.y= 0;
@@ -128,19 +135,32 @@ function update() {
     
     if((trapPlayer||trapPlayer2) && (player.body.touching.up || player.body.touching.down)){
         this.game.state.restart()
-    }
+    }*/
+
     
-    triggerPlayer = game.physics.arcade.overlap(player, button);
-    triggerCube = game.physics.arcade.overlap(cube2, button);
+	button.height = 32;
+	button2.height = 32;
+	
+    game.physics.arcade.overlap(player, button, trigger);
+    game.physics.arcade.overlap(cube2, button, trigger);
+	game.physics.arcade.overlap(player, button2, trigger);
+    game.physics.arcade.overlap(cube2, button2, trigger);
+	
+		
+	
+	if((trapbox.position.y < 1900) && k===0 && j===0){
+		trapbox.body.velocity.y= 200;
+		trapbox2.body.velocity.y = -200;
+	}
     
-    //pulsante
+    /* //pulsante
     if (triggerPlayer === true || triggerCube === true){
         button.height = 0;
         trapbox.body.gravity.y = 0;
         j=0;
-        if(trapbox.position.y > 1600){
+        if(trapbox.position.y > 1500){
             trapbox.body.velocity.y = -150;
-            trapbox2.body.gravity.y= 400;
+            trapbox2.body.velocity.y= 150;
         }else{
             trapbox.body.velocity.y = 0;
             trapbox2.body.velocity.y = 0;
@@ -151,10 +171,12 @@ function update() {
       if((trapbox.position.y < 1900) && j===0 ){
             button.height = 32;
           trapbox.body.gravity.y= 400;
-          trapbox2.body.velocity.y = -150;
+          trapbox2.body.gravity.y = -400;
         }
 
     }
+	
+	*/
     
     if(player.body.velocity.x < 0){
             player.animations.play('left');
@@ -216,11 +238,45 @@ function update() {
         
         player.body.velocity.y = -350;
     }
-    
-    
+      
     
 }
 
+function trigger(obj, btn){
+        btn.height = 0;
+		k=1;
+		j=0;
+        trapbox.body.gravity.y = 0;
+        if(trapbox.position.y > 1600){
+            trapbox.body.velocity.y = -150;
+            trapbox2.body.velocity.y= 150;
+        }else{
+            trapbox.body.velocity.y = 0;
+            trapbox2.body.velocity.y = 0;
+        }
+	
+}
+
+function trapPlayer(){
+	if(player.body.touching.up || player.body.touching.down){
+        alert('Game Over'); //sostituire con restart fatto bene
+    }
+}
+
+function trapCube(){
+        
+		if(cube2.body.touching.up){
+			cube2.body.immovable = true;
+			j=1;
+        }
+	
+        trapbox.body.gravity.y= 0;
+        trapbox.body.velocity.y = 0;
+        trapbox2.body.gravity.y= 0;
+        trapbox2.body.velocity.y = 0;
+        
+
+    }
 
 
 function createCubes(x,y) {
@@ -240,7 +296,8 @@ function updateCubes(cube, player){
 	cube.body.immovable = true;
 	
 	//drag function
-    
+    console.log("j="+j);
+	console.log("k="+k);
 	if (drag.isDown && ((cube.position.x - player.position.x < 50) && (cube.position.x - player.position.x > -50)) && ((cube.position.y - player.position.y < 20) && (cube.position.y - player.position.y > -20)) && i===0 && j===0) {
         		
 		//cube.draggable===true;

@@ -66,7 +66,7 @@ function create() {
     trapbox.body.immovable = true;
     trapbox2.body.immovable = true;
     player.body.collideWorldBounds = true;
-    player.body.gravity.y = 550;
+    player.body.gravity.y = 600;
     player.body.bounce.y = 0.09;
     player.body.velocity.x = 0;
     
@@ -86,7 +86,7 @@ function create() {
 
     game.camera.follow(player);
     
-    game.camera.deadzone = new Phaser.Rectangle(387, 350, 250, 0);
+    game.camera.deadzone = new Phaser.Rectangle(387, 400, 250, 100);
 }
 
 
@@ -217,12 +217,12 @@ function update() {
     
         if(cursors.left.isDown && (player.body.onFloor() || player.body.touching.down)){
 
-            player.body.velocity.x= -250;
+            player.body.velocity.x= -230;
 
 
         }
         else if(cursors.right.isDown && (player.body.onFloor() || player.body.touching.down)){
-            player.body.velocity.x= 250;
+            player.body.velocity.x= 230;
 
         }
 
@@ -236,7 +236,7 @@ function update() {
     
     if(jumpButton.isDown && (player.body.onFloor() || player.body.touching.down)){
         
-        player.body.velocity.y = -350;
+        player.body.velocity.y = -400;
     }
       
     

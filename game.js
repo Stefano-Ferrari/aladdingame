@@ -5,11 +5,12 @@ function preload() {
     game.load.image('background', 'assets/Lungo.png');
     game.load.tilemap('mappa', 'mappa.json', null, Phaser.Tilemap.TILED_JSON);
     game.load.image('tiles', 'Aladdin_tiles.png');
-    game.load.spritesheet('dude', 'assets/dudeBIG.png',56,84);
+    game.load.spritesheet('aladdin', 'assets/AladdinSpritesheet.png',56,84);
     game.load.image('star', 'assets/star.png');
     game.load.image('cube', 'assets/50x50.png');
     game.load.image('pareteMobile', 'assets/pareteMobile.png');
     game.load.image('button', 'assets/button.png');
+	game.load.image('tile_mobile', 'assets/tile_mobile.png');
 }
 
 var player;
@@ -41,12 +42,14 @@ function create() {
     cube2.anchor.x=0.25;
 	cube2.anchor.y=0.25;
     
+	tileMob11 = createTileMobY(900, 2000, 1);
+	
     button = game.add.sprite( 1330, 2240, 'button');
 	button2 = game.add.sprite( 1680, 2240, 'button');
     trapbox = game.add.sprite( 1536, 1880, 'pareteMobile');
 	trapbox2 = game.add.sprite( 1922, 1680, 'pareteMobile');
     
-    player = game.add.sprite(100,2200,'dude');
+    player = game.add.sprite(100,2200,'aladdin');
 	player.anchor.x=0.25;
 	player.anchor.y=0.25;
     player.animations.add('right', [5,6,7,8], 10, true);
@@ -72,7 +75,7 @@ function create() {
     
 
     key1 = createKeys(1500, 1850);
-	key1.anchor.x=0.25;
+	key1.anchor.x=0;
 	key1.anchor.y=0.25;    
    
     
@@ -96,7 +99,9 @@ function update() {
 	//console.log(j);
 	
     player.dragging=false;
-
+	
+	
+	
 
     updateCubes(cube2, player);
 	updateCubes(cube1, player);
@@ -106,7 +111,7 @@ function update() {
 	
 
 	
-    game.physics.arcade.collide(player, layer);
+    touching = game.physics.arcade.collide(player, layer);
     game.physics.arcade.collide(player, trapbox, trapPlayer);
     game.physics.arcade.collide(player, trapbox2, trapPlayer);
     game.physics.arcade.collide(trapbox, cube2, trapCube);
@@ -114,6 +119,7 @@ function update() {
     game.physics.arcade.collide(layer, trapbox);
     game.physics.arcade.collide(layer, trapbox2);    
     
+	updateTileMobY1(tileMob11, player, touching);
 	k=0;
     /* //parete mobile
     if( trapCube){
@@ -278,6 +284,33 @@ function trapCube(){
 
     }
 
+function createTileMobY(x,y,dir) {
+	t = game.add.sprite(x,y,'tile_mobile');
+	game.physics.arcade.enable(t);
+  	if(dir>0){
+		t.body.velocity.y = 100;
+	}else{
+		t.body.velocity.y = -100;
+	}
+	t.body.immovable = true;
+  	return t;
+}
+
+function updateTileMobY1(tile, player, touching) {
+	var speed = tile.body.velocity.y;
+	touch = game.physics.arcade.collide(tile, layer);
+	touch2 = game.physics.arcade.collide(tile, player);
+	if(touch){
+		tile.body.velocity.y = -(speed);
+		console.log(speed);
+	}else if(touch2 && touching){
+		tile.body.velocity.y = -(speed);
+		console.log(speed);
+	}
+	
+	
+}
+
 
 function createCubes(x,y) {
 	c = game.add.sprite(x,y,'cube');
@@ -296,9 +329,7 @@ function updateCubes(cube, player){
 	cube.body.immovable = true;
 	
 	//drag function
-    console.log("j="+j);
-	console.log("k="+k);
-	if (drag.isDown && ((cube.position.x - player.position.x < 50) && (cube.position.x - player.position.x > -50)) && ((cube.position.y - player.position.y < 20) && (cube.position.y - player.position.y > -20)) && i===0 && j===0) {
+	if (drag.isDown && ((cube.position.x - player.position.x < 80) && (cube.position.x - player.position.x > -80)) && ((cube.position.y - player.position.y < 50) && (cube.position.y - player.position.y > -50)) && i===0 && j===0) {
         		
 		//cube.draggable===true;
         player.dragging=true;
@@ -338,7 +369,7 @@ function updateKeys(key, player){
 	key.body.velocity.x = 0;
 	key.body.immovable = true;
 	
-	if (take.downDuration(250) && ((key.position.x - player.position.x < 32) && (key.position.x - player.position.x > -33))) {
+	if (take.downDuration(250) && ((key.position.x - player.position.x < 32) && (key.position.x - player.position.x > -33) && (key.position.y - player.position.y < 32) && (key.position.y - player.position.y > -33))) {
         
         i = 1;
         key.body.gravity.y = 0;

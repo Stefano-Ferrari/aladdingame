@@ -11,6 +11,7 @@ function preload() {
     game.load.image('pareteMobile', 'assets/pareteMobile.png');
     game.load.image('button', 'assets/button.png');
 	game.load.image('tile_mobile', 'assets/tile_mobile.png');
+    game.load.image('door', 'assets/door.png');
 }
 
 var player;
@@ -74,10 +75,12 @@ function create() {
     player.body.velocity.x = 0;
     
 
-    key1 = createKeys(1500, 1850);
+    key1 = createKeys(1000, 1850);
 	key1.anchor.x=0;
-	key1.anchor.y=0.25;    
-   
+	key1.anchor.y=0.25;
+    
+    door1 = createDoors(1200, 2100);
+       
     
     cursors = game.input.keyboard.createCursorKeys();
     jumpButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
@@ -108,6 +111,7 @@ function update() {
 
 	
 	updateKeys(key1, player);
+    updateDoors(door1, player);
 	
 
 	
@@ -369,7 +373,7 @@ function updateKeys(key, player){
 	key.body.velocity.x = 0;
 	key.body.immovable = true;
 	
-	if (take.downDuration(250) && ((key.position.x - player.position.x < 32) && (key.position.x - player.position.x > -33) && (key.position.y - player.position.y < 32) && (key.position.y - player.position.y > -33))) {
+	if (take.downDuration(250) && ((key.position.x - player.position.x < 32) && (key.position.x - player.position.x > -33) && (key.position.y - player.position.y < 50) && (key.position.y - player.position.y > -33))) {
         
         i = 1;
         key.body.gravity.y = 0;
@@ -379,7 +383,7 @@ function updateKeys(key, player){
         
     }
     
-    if (drop.downDuration(250) && ((key.position.x - player.position.x < 32) && (key.position.x - player.position.x > -33))) {
+    if (drop.downDuration(250) && ((key.position.x - player.position.x < 32) && (key.position.x - player.position.x > -33)) && i===1) {
         
         if (direction === -1){
             i = 0;
@@ -402,5 +406,22 @@ function updateKeys(key, player){
 			key.x = player.x;
         	key.y = player.y - 32;
 		}
+    }
+}
+
+
+function createDoors(x,y){
+    d = game.add.sprite(x,y,'door');
+	game.physics.arcade.enable(d);
+  	d.body.velocity.x = 0;
+	d.body.immovable = true;
+    //d.draggable=false;
+  return d;
+}
+
+function updateDoors(door, player){
+    check = game.physics.arcade.collide(door, player);
+    if (check && i===1){
+        door.kill();
     }
 }
